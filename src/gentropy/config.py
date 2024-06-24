@@ -160,11 +160,11 @@ class LDIndexConfig(StepConfig):
     )
     ld_index_out: str = MISSING
     min_r2: float = 0.5
-    ld_matrix_template: str = "gs://gcp-public-data--gnomad/release/2.1.1/ld/gnomad.genomes.r2.1.1.{POP}.common.adj.ld.bm"
-    ld_index_raw_template: str = "gs://gcp-public-data--gnomad/release/2.1.1/ld/gnomad.genomes.r2.1.1.{POP}.common.ld.variant_indices.ht"
-    liftover_ht_path: str = "gs://gcp-public-data--gnomad/release/2.1.1/liftover_grch38/ht/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.ht"
+    ld_matrix_template: str = "/data/gnomad_ld/2.1.1/ld/gnomad.genomes.r2.1.1.{POP}.common.adj.ld.bm"
+    ld_index_raw_template: str = "/data/gnomad_ld/2.1.1/ld/gnomad.genomes.r2.1.1.{POP}.common.ld.variant_indices.ht"
+    liftover_ht_path: str = "/data/gnomad_ld/2.1.1/liftover_grch38/ht/genomes/gnomad.genomes.r2.1.1.sites.liftover_grch38.ht"
     grch37_to_grch38_chain_path: str = (
-        "gs://hail-common/references/grch37_to_grch38.over.chain.gz"
+        "/data/gnomad_ld/references/grch37_to_grch38.over.chain.gz"
     )
     ld_populations: list[str] = field(
         default_factory=lambda: [
