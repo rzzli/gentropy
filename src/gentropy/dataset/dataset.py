@@ -14,6 +14,8 @@ from typing_extensions import Self
 from gentropy.common.schemas import flatten_schema
 
 if TYPE_CHECKING:
+    from enum import Enum
+
     from pyspark.sql import Column, DataFrame
     from pyspark.sql.types import StructType
 
@@ -93,7 +95,7 @@ class Dataset(ABC):
             ValueError: Parquet file is empty
         """
         schema = cls.get_schema()
-        df = session.read_parquet(path, schema=schema, **kwargs)
+        df = session.load_data(path, format="parquet", schema=schema, **kwargs)
         if df.isEmpty():
             raise ValueError(f"Parquet file is empty: {path}")
         return cls(_df=df, _schema=schema)
@@ -238,3 +240,23 @@ class Dataset(ABC):
         """
         self.df = self._df.repartition(num_partitions, **kwargs)
         return self
+
+    @staticmethod
+    def update_quality_flag(
+        qc: Column, flag_condition: Column, flag_text: Enum
+    ) -> Column:
+        """Update the provided quality control list with a new flag if condition is met.
+
+        Args:
+            qc (Column): Array column with the current list of qc flags.
+            flag_condition (Column): This is a column of booleans, signing which row should be flagged
+            flag_text (Enum): Text for the new quality control flag
+
+        Returns:
+            Column: Array column with the updated list of qc flags.
+        """
+        qc = f.when(qc.isNull(), f.array()).otherwise(qc)
+        return f.when(
+            flag_condition,
+            f.array_union(qc, f.array(f.lit(flag_text.value))),
+        ).otherwise(qc)

@@ -6,7 +6,6 @@ import logging
 import time
 from typing import Any
 
-import hail as hl
 import numpy as np
 import pandas as pd
 import pyspark.sql.functions as f
@@ -22,7 +21,10 @@ from pyspark.sql.types import (
 )
 
 from gentropy.common.session import Session
-from gentropy.common.spark_helpers import neglog_pvalue_to_mantissa_and_exponent
+from gentropy.common.spark_helpers import (
+    neglog_pvalue_to_mantissa_and_exponent,
+    order_array_of_structs_by_field,
+)
 from gentropy.dataset.study_index import StudyIndex
 from gentropy.dataset.study_locus import StudyLocus
 from gentropy.dataset.summary_statistics import SummaryStatistics
@@ -80,8 +82,6 @@ class SusieFineMapperStep:
             imputed_r2_threshold (float): imputed R2 threshold, default is 0.9
             ld_score_threshold (float): LD score threshold ofr imputation, default is 5
         """
-        # Initialise Hail
-        hl.init(sc=session.spark.sparkContext, log="/dev/null")
         # Read studyLocus
         study_locus = (
             StudyLocus.from_parquet(session, study_locus_to_finemap)
@@ -1263,9 +1263,9 @@ class SusieFineMapperStep:
         study_index_df = study_index_df.filter(f.col("studyId") == studyId)
         major_population = study_index_df.select(
             "studyId",
-            f.array_max(f.col("ldPopulationStructure"))
-            .getItem("ldPopulation")
-            .alias("majorPopulation"),
+            order_array_of_structs_by_field(
+                "ldPopulationStructure", "relativeSampleSize"
+            )[0]["ldPopulation"].alias("majorPopulation"),
         ).collect()[0]["majorPopulation"]
 
         region = chromosome + ":" + str(int(locusStart)) + "-" + str(int(locusEnd))
