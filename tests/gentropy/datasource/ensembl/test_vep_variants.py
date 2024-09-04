@@ -5,10 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from gentropy.dataset.variant_index import VariantIndex
-from gentropy.datasource.ensembl.vep_parser import VariantEffectPredictorParser
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as f
+
+from gentropy.dataset.variant_index import VariantIndex
+from gentropy.datasource.ensembl.vep_parser import VariantEffectPredictorParser
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
@@ -103,7 +104,7 @@ class TestVEPParser:
             schema=VariantEffectPredictorParser.get_schema(),
         )
         self.processed_vep_output = VariantEffectPredictorParser.process_vep_output(
-            self.raw_vep_output
+            self.raw_vep_output, 200
         )
 
     def test_extract_variant_index_from_vep(
